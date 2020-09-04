@@ -1,7 +1,7 @@
-// Package intintmap is a fast int64 key -> int64 value map.
+// Package intfloatmap is a fast int64 key -> float64 value map.
 //
 // It is copied nearly verbatim from http://java-performance.info/implementing-world-fastest-java-int-to-int-hash-map/
-package intintmap
+package intfloatmap
 
 import (
 	"math"
