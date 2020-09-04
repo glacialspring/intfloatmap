@@ -28,8 +28,8 @@ type Map struct {
 	mask  int64 // mask to calculate the original position
 	mask2 int64
 
-	hasFreeKey bool  // do we have 'free' key in the map?
-	freeVal    int64 // value of 'free' key
+	hasFreeKey bool    // do we have 'free' key in the map?
+	freeVal    float64 // value of 'free' key
 }
 
 func nextPowerOf2(x uint32) uint32 {
@@ -80,7 +80,7 @@ func New(size int, fillFactor float64) *Map {
 }
 
 // Get returns the value if the key is found.
-func (m *Map) Get(key int64) (int64, bool) {
+func (m *Map) Get(key int64) (float64, bool) {
 	if key == FREE_KEY {
 		if m.hasFreeKey {
 			return m.freeVal, true
@@ -98,7 +98,7 @@ func (m *Map) Get(key int64) (int64, bool) {
 		return 0, false
 	}
 	if k == key { // we check FREE prior to this call
-		return m.data[ptr+1], true
+		return math.Float64frombits(uint64(m.data[ptr+1])), true
 	}
 
 	for {
@@ -108,19 +108,20 @@ func (m *Map) Get(key int64) (int64, bool) {
 			return 0, false
 		}
 		if k == key {
-			return m.data[ptr+1], true
+			return math.Float64frombits(uint64(m.data[ptr+1])), true
 		}
 	}
 }
 
 // Put adds or updates key with value val.
-func (m *Map) Put(key int64, val int64) {
+func (m *Map) Put(key int64, valf float64) {
+	val := int64(math.Float64bits(valf))
 	if key == FREE_KEY {
 		if !m.hasFreeKey {
 			m.size++
 		}
 		m.hasFreeKey = true
-		m.freeVal = val
+		m.freeVal = valf
 		return
 	}
 
@@ -248,7 +249,7 @@ func (m *Map) rehash() {
 	for i := 0; i < len(data); i += 2 {
 		o = data[i]
 		if o != FREE_KEY {
-			m.Put(o, data[i+1])
+			m.Put(o, math.Float64frombits(uint64(data[i+1])))
 		}
 	}
 }
@@ -282,14 +283,19 @@ func (m *Map) Keys() chan int64 {
 }
 
 // Items returns a channel for iterating all key-value pairs.
-func (m *Map) Items() chan [2]int64 {
-	c := make(chan [2]int64, 10)
+type KeyValuePair struct {
+	Key   int64
+	Value float64
+}
+
+func (m *Map) Items() chan KeyValuePair {
+	c := make(chan KeyValuePair, 10)
 	go func() {
 		data := m.data
 		var k int64
 
 		if m.hasFreeKey {
-			c <- [2]int64{FREE_KEY, m.freeVal}
+			c <- KeyValuePair{FREE_KEY, m.freeVal}
 		}
 
 		for i := 0; i < len(data); i += 2 {
@@ -297,7 +303,7 @@ func (m *Map) Items() chan [2]int64 {
 			if k == FREE_KEY {
 				continue
 			}
-			c <- [2]int64{k, data[i+1]}
+			c <- KeyValuePair{k, math.Float64frombits(uint64(data[i+1]))}
 		}
 		close(c)
 	}()
