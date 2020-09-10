@@ -12,7 +12,7 @@ It interleaves keys and values in the same underlying array to improve locality.
 
 It is 2-4X faster than the builtin map:
 ```
-BenchmarkIntFloatMapFill                 	  10	 142930930 ns/op
+BenchmarkIntFloatMapFill                      10	 142930930 ns/op
 BenchmarkStdMapFill                    	       5	 297418730 ns/op
 BenchmarkIntFloatMapGet10PercentHitRate	    5000	    124437 ns/op
 BenchmarkStdMapGet10PercentHitRate     	    5000	    143553 ns/op
