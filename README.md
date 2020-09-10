@@ -5,9 +5,9 @@ Fast int64 -> int64 hash in golang.
 
 # intintmap
 
-    import "github.com/brentp/intintmap"
+    import "github.com/glacialspring/intfloatmap"
 
-Package intintmap is a fast int64 key -> int64 value map.
+Package intintmap is a fast int64 key -> float64 value map.
 
 It is copied nearly verbatim from
 http://java-performance.info/implementing-world-fastest-java-int-to-int-hash-map/ .
