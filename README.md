@@ -1,35 +1,31 @@
-Fast int64 -> int64 hash in golang.
+Fast int64 -> float64 hash in golang.
 
-[![GoDoc](https://godoc.org/github.com/brentp/intintmap?status.svg)](https://godoc.org/github.com/brentp/intintmap)
-[![Go Report Card](https://goreportcard.com/badge/github.com/brentp/intintmap)](https://goreportcard.com/report/github.com/brentp/intintmap)
+slightly modified from brenpt/intintmap to have float64 values instead
 
-# intintmap
+# intfloatmap
 
     import "github.com/glacialspring/intfloatmap"
 
 Package intintmap is a fast int64 key -> float64 value map.
 
-It is copied nearly verbatim from
-http://java-performance.info/implementing-world-fastest-java-int-to-int-hash-map/ .
-
 It interleaves keys and values in the same underlying array to improve locality.
 
-It is 2-5X faster than the builtin map:
+It is 2-4X faster than the builtin map:
 ```
-BenchmarkIntIntMapFill                 	      10	 158436598 ns/op
-BenchmarkStdMapFill                    	       5	 312135474 ns/op
-BenchmarkIntIntMapGet10PercentHitRate  	    5000	    243108 ns/op
-BenchmarkStdMapGet10PercentHitRate     	    5000	    268927 ns/op
-BenchmarkIntIntMapGet100PercentHitRate 	     500	   2249349 ns/op
-BenchmarkStdMapGet100PercentHitRate    	     100	  10258929 ns/op
+BenchmarkIntFloatMapFill                 	  10	 142930930 ns/op
+BenchmarkStdMapFill                    	       5	 297418730 ns/op
+BenchmarkIntFloatMapGet10PercentHitRate	    5000	    124437 ns/op
+BenchmarkStdMapGet10PercentHitRate     	    5000	    143553 ns/op
+BenchmarkIntFloatMapGet100PercentHitRate     500	   3843636 ns/op
+BenchmarkStdMapGet100PercentHitRate    	     100	  13164908 ns/op
 ```
 
 ## Usage
 
 ```go
-m := intintmap.New(32768, 0.6)
-m.Put(int64(1234), int64(-222))
-m.Put(int64(123), int64(33))
+m := intfloatmap.New(32768, 0.6)
+m.Put(int64(1234), float64(-222))
+m.Put(int64(123), float64(33))
 
 v, ok := m.Get(int64(222))
 v, ok := m.Get(int64(333))
@@ -44,7 +40,7 @@ for k := range m.Keys() {
 }
 
 for kv := range m.Items() {
-    fmt.Printf("key: %d, value: %d\n", kv[0], kv[1])
+    fmt.Printf("key: %d, value: %g\n", kv[0], kv[1])
 }
 ```
 
@@ -68,14 +64,14 @@ map will grow as needed.
 #### func (*Map) Get
 
 ```go
-func (m *Map) Get(key int64) (int64, bool)
+func (m *Map) Get(key int64) (float64, bool)
 ```
 Get returns the value if the key is found.
 
 #### func (*Map) Put
 
 ```go
-func (m *Map) Put(key int64, val int64)
+func (m *Map) Put(key int64, val float64)
 ```
 Put adds or updates key with value val.
 
@@ -96,7 +92,7 @@ Keys returns a channel for iterating all keys.
 #### func (*Map) Items
 
 ```go
-func (m *Map) Items() chan [2]int64
+func (m *Map) Items() chan KeyValuePair
 ```
 Items returns a channel for iterating all key-value pairs.
 
